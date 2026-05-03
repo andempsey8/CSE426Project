@@ -24,6 +24,3 @@
 
 # Hardhat deployments
 /ignition/deployments
-
-#env file
-.env
