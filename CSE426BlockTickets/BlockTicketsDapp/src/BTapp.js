@@ -8,7 +8,6 @@ class App {
         this.walletConnected = false;
         this.userAddress = null;
 
-        // NEW ─── YODA token setup ─────────────────────────────────────────────
         this.YodaAddress = "0xbd27d0b7F9fedb5A2A2C3ceF5dC9c70f3CF64Af2";
         this.YodaABI = [
             "function approve(address spender, uint256 amount) external returns (bool)",
@@ -49,7 +48,6 @@ class App {
                 this.signer
             );
 
-            // NEW ─── Instantiate YODA contract ───────────────────────────────
             this.yodaContract = new ethers.Contract(
                 this.YodaAddress,
                 this.YodaABI,
@@ -64,18 +62,14 @@ class App {
             console.log("Connected to MetaMask and contract successfully.");
             console.log("User Address:", this.userAddress);
 
-            // NEW ─── Log YODA balance on connect ─────────────────────────────
             const yodaBalance = await this.yodaContract.balanceOf(this.userAddress);
-            console.log("YODA Balance:", ethers.utils.formatEther(yodaBalance));
+            console.log("YODA Balance:", ethers.utils.formatUnits(yodaBalance, 2));
 
         } catch (error) {
             console.error("MetaMask connection failed:", error);
         }
     }
 
-    /* ─────────────────────────────────────────────
-       LOAD EVENTS FROM CONTRACT
-    ───────────────────────────────────────────── */
     async loadEvents() {
         try {
             const events = await this.contract.getAllEvents();
@@ -83,7 +77,7 @@ class App {
             return events.map(e => ({
                 id: e.eventId.toString(),
                 name: e.name,
-                price: ethers.utils.formatEther(e.ticketPrice),
+                price: ethers.utils.formatUnits(e.ticketPrice, 2),
                 available: (e.totalSupply - e.minted).toString()
             }));
 
@@ -93,9 +87,6 @@ class App {
         }
     }
 
-    /* ─────────────────────────────────────────────
-       LOAD MARKET LISTINGS
-    ───────────────────────────────────────────── */
     async loadListings() {
         try {
             const [tokenIds, allListings] = await this.contract.getAllListings();
@@ -112,7 +103,7 @@ class App {
                     eventId: eventId.toString(),
                     name: evt.name,
                     ticketId: tokenId.toString(),
-                    price: ethers.utils.formatEther(listing.price)
+                    price: ethers.utils.formatUnits(listing.price, 2)
                 });
             }
 
@@ -124,9 +115,6 @@ class App {
         }
     }
 
-    /* ─────────────────────────────────────────────
-       UI: HOME
-    ───────────────────────────────────────────── */
     showHome() {
         document.getElementById("content").innerHTML = `
             <h2>Home</h2>
@@ -135,13 +123,9 @@ class App {
         `;
     }
 
-    /* ─────────────────────────────────────────────
-       UI: EVENTS
-    ───────────────────────────────────────────── */
     async showEvents() {
         const events = await this.loadEvents();
 
-        // NEW ─── changed ETH label to YODA ───────────────────────────────────
         let html = `
             <h2>Available Events</h2>
             <table>
@@ -170,12 +154,7 @@ class App {
         html += `</tbody></table>`;
         document.getElementById("content").innerHTML = html;
     }
-
-    /* ─────────────────────────────────────────────
-       UI: CREATE EVENT
-    ───────────────────────────────────────────── */
     showCreateEvent() {
-        // NEW ─── changed ETH labels to YODA ──────────────────────────────────
         document.getElementById("content").innerHTML = `
             <h2>Create Event</h2>
 
@@ -210,9 +189,6 @@ class App {
         }
     }
 
-    /* ─────────────────────────────────────────────
-       BUY TICKET
-    ───────────────────────────────────────────── */
     showBuyTicket() {
         document.getElementById("content").innerHTML = `
             <h2>Buy Ticket</h2>
@@ -230,14 +206,12 @@ class App {
             const eventId = document.getElementById("buyEventId").value;
             const evt = await this.contract.events(eventId);
 
-            // NEW ─── Approve YODA spend before buying ────────────────────────
             const approveTx = await this.yodaContract.approve(
                 this.ContractAddress,
                 evt.ticketPrice
             );
             await approveTx.wait();
 
-            // NEW ─── No longer passing { value: ... } ────────────────────────
             const tx = await this.contract.buyTicket(eventId);
             await tx.wait();
             alert("Ticket purchased!");
@@ -248,11 +222,7 @@ class App {
         }
     }
 
-    /* ─────────────────────────────────────────────
-       SELL TICKET
-    ───────────────────────────────────────────── */
     showSellTicket() {
-        // NEW ─── changed ETH label to YODA ───────────────────────────────────
         document.getElementById("content").innerHTML = `
             <h2>Sell Ticket</h2>
 
@@ -281,13 +251,9 @@ class App {
         }
     }
 
-    /* ─────────────────────────────────────────────
-       MARKET
-    ───────────────────────────────────────────── */
     async showMarket() {
         const listings = await this.loadListings();
 
-        // NEW ─── changed ETH label to YODA ───────────────────────────────────
         let html = `
             <h2>Market</h2>
 
@@ -330,14 +296,12 @@ class App {
             const tokenId = document.getElementById("marketTokenId").value;
             const listing = await this.contract.listings(tokenId);
 
-            // NEW ─── Approve YODA spend before buying ────────────────────────
             const approveTx = await this.yodaContract.approve(
                 this.ContractAddress,
                 listing.price
             );
             await approveTx.wait();
 
-            // NEW ─── No longer passing { value: ... } ────────────────────────
             const tx = await this.contract.buyListedTicket(tokenId);
             await tx.wait();
             alert("Ticket purchased!");
@@ -349,9 +313,6 @@ class App {
     }
 }
 
-/* ─────────────────────────────────────────────
-   INIT + GLOBAL HOOKS
-──────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", async () => {
     window.app = new App();
     await window.app.connectMetaMaskAndContract();

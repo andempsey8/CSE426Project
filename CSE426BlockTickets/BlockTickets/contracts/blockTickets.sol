@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 
-// NEW ─── YODA Token Interface ─────────────────────────────────────────────────
 interface IERC20 {
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
     function transfer(address recipient, uint256 amount) external returns (bool);
@@ -14,15 +13,10 @@ interface IERC20 {
 
 contract BlockTickets is ERC721URIStorage, ReentrancyGuard {
 
-    // ─── Counters (manual) ───────────────────────────────────────────────────
-
     uint256 private _eventIdCounter;
     uint256 private _tokenIdCounter;
 
-    // NEW ─── YODA Token ───────────────────────────────────────────────────────
     IERC20 public yodaToken;
-
-    // ─── Structs ─────────────────────────────────────────────────────────────
 
     struct Event {
         uint256 eventId;
@@ -41,25 +35,18 @@ contract BlockTickets is ERC721URIStorage, ReentrancyGuard {
         bool    active;
     }
 
-    // ─── Storage ─────────────────────────────────────────────────────────────
-
     mapping(uint256 => Event)   public events;
     mapping(uint256 => uint256) public tokenEvent;
     mapping(uint256 => Listing) public listings;
-
-    // ─── Events ──────────────────────────────────────────────────────────────
 
     event EventCreated(uint256 indexed eventId, address indexed creator);
     event TicketMinted(uint256 indexed tokenId, uint256 indexed eventId, address buyer);
     event TicketListed(uint256 indexed tokenId, address seller, uint256 price);
     event TicketSold(uint256 indexed tokenId, address from, address to, uint256 price);
 
-    // NEW ─── Constructor ──────────────────────────────────────────────────────
     constructor(address _yodaTokenAddress) ERC721("BlockTickets", "BTIX") {
         yodaToken = IERC20(_yodaTokenAddress);
     }
-
-    // ─── Event Creation ──────────────────────────────────────────────────────
 
     function createEvent(string calldata eventName, uint256 ticketPrice, uint256 maxResalePrice, uint16 royaltyBps, uint32 totalSupply) external returns (uint256 eventId) {
         require(totalSupply > 0, "Invalid supply");
@@ -82,16 +69,12 @@ contract BlockTickets is ERC721URIStorage, ReentrancyGuard {
         emit EventCreated(eventId, msg.sender);
     }
 
-    // ─── Primary Sale ────────────────────────────────────────────────────────
-
-    // NEW ─── removed payable, replaced msg.value with YODA transferFrom ───────
     function buyTicket(uint256 eventId) external nonReentrant {
         Event storage evt = events[eventId];
 
         require(evt.eventId != 0, "Invalid event");
         require(evt.minted < evt.totalSupply, "Sold out");
 
-        // NEW ─── Pull YODA from buyer ─────────────────────────────────────────
         bool taken = yodaToken.transferFrom(msg.sender, address(this), evt.ticketPrice);
         require(taken, "YODA payment failed");
 
@@ -104,13 +87,10 @@ contract BlockTickets is ERC721URIStorage, ReentrancyGuard {
         _safeMint(msg.sender, tokenId);
         _setDynamicTokenURI(tokenId, evt);
 
-        // NEW ─── Send YODA to creator ─────────────────────────────────────────
         _sendYODA(evt.creator, evt.ticketPrice);
 
         emit TicketMinted(tokenId, eventId, msg.sender);
     }
-
-    // ─── Secondary Market ────────────────────────────────────────────────────
 
     function listTicket(uint256 tokenId, uint256 price) external {
         require(ownerOf(tokenId) == msg.sender, "Not owner");
@@ -124,7 +104,6 @@ contract BlockTickets is ERC721URIStorage, ReentrancyGuard {
         emit TicketListed(tokenId, msg.sender, price);
     }
 
-    // NEW ─── removed payable, replaced msg.value with YODA transferFrom ───────
     function buyListedTicket(uint256 tokenId) external nonReentrant {
         Listing storage listing = listings[tokenId];
         require(listing.active, "Not listed");
@@ -135,7 +114,6 @@ contract BlockTickets is ERC721URIStorage, ReentrancyGuard {
         uint256 price = listing.price;
         listing.active = false;
 
-        // NEW ─── Pull YODA from buyer ─────────────────────────────────────────
         bool taken = yodaToken.transferFrom(msg.sender, address(this), price);
         require(taken, "YODA payment failed");
 
@@ -144,16 +122,12 @@ contract BlockTickets is ERC721URIStorage, ReentrancyGuard {
 
         _transfer(seller, msg.sender, tokenId);
 
-        // NEW ─── Split YODA to creator and seller ────────────────────────────
         _sendYODA(evt.creator, royalty);
         _sendYODA(seller, sellerAmount);
 
         emit TicketSold(tokenId, seller, msg.sender, price);
     }
 
-    // ─── Helpers ─────────────────────────────────────────────────────────────
-
-    // NEW ─── renamed from _sendETH ───────────────────────────────────────────
     function _sendYODA(address to, uint256 amount) internal {
         bool success = yodaToken.transfer(to, amount);
         require(success, "YODA transfer failed");
