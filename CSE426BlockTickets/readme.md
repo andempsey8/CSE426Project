@@ -7,7 +7,7 @@
 **Terminal 1:**
 
 ```bash
-cd CH05Ballot/Ballot
+cd CSE426BlockTickets/BlockTickets
 npm install
 npm install @openzeppelin/contracts
 npx hardhat compile
@@ -18,7 +18,7 @@ npx hardhat node
 **Terminal 2:**
 
 ```bash
-cd CH05Ballot/Ballot
+cd CSE426BlockTickets/BlockTickets
 npx hardhat ignition deploy ./ignition/modules/BlockTickets.ts --network localhost
 ```
 This deploys the contract
@@ -31,13 +31,13 @@ This deploys the contract
 **Terminal 3:**
 
 ```bash
-cd CH05Ballot/BallotDapp
+cd CSE426BlockTickets/BlockTicketsDapp
 
 ```
 
-1.  Open `CH05Ballot/BallotDapp/src/app.js`
+1.  Open `CSE426BlockTickets/BlockTicketsDapp/src/BTapp.js`
     
-2.  Update the fields address in the app.js:
+2.  Update the fields address in the BTapp.js:
     
     ```javascript
     this.ContractAddress = '5FbD...<fill in your deployed address>';    
