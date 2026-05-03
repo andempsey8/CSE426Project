@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Block Tickets</title>
+
+  <!-- Toastr CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"/>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      background: #f4f6f9;
+    }
+
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: #111827;
+      color: white;
+      display: flex;
+      align-items: center;
+      padding-left: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      z-index: 1000;
+    }
+
+    .sidebar {
+      width: 220px;
+      background: #1f2937;
+      padding-top: 70px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar a {
+      padding: 15px 20px;
+      color: #d1d5db;
+      text-decoration: none;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar a:hover {
+      background: #111827;
+      color: white;
+      border-left: 3px solid #3b82f6;
+    }
+
+    .main {
+      flex: 1;
+      margin-top: 60px;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+    }
+
+    th {
+      background: #f3f4f6;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    label {
+      font-size: 12px;
+      color: #374151;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 12px;
+      width: 100%;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    Block Tickets
+  </div>
+
+  <div class="sidebar">
+    <a onclick="showHome()">Home</a>
+    <a onclick="showEvents()">View Events</a>
+    <a onclick="showCreateEvent()">Create Event</a>
+    <a onclick="showBuyTicket()">Buy Ticket</a>
+    <a onclick="showSellTicket()">Sell Ticket</a>
+    <a onclick="showMarket()">Market</a>
+  </div>
+
+  <div class="main">
+    <div id="content" class="card">
+      <h2>Welcome to Block Tickets</h2>
+      <p>Select an option from the sidebar.</p>
+    </div>
+  </div>
+
+  <!-- Toastr JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+  <!-- Ethers.js -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.2.0/dist/ethers.umd.min.js"></script>
+
+  <!-- Your App Logic (MUST BE LAST) -->
+  <script src="BTapp.js"></script>
+
+
+  <div id="overlay" style="
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(128, 128, 128, 0.97); /* semi-transparent grey */
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5rem;
+        color: white;
+        user-select: none;
+        ">
+        Please connect your MetaMask wallet...
+    </div>
+</body>
+</html>
